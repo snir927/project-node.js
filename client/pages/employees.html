@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>employees</title>
+</head>
+<body onload="getEmployees()">
+    <h1>Employees:</h1>
+    <div id="name"></div> <br/>
+    <table id="table" border="1">
+        <tr>
+            <th>Full name</th>
+            <th>Department</th>
+            <th>shifts</th>
+        </tr>
+    </table>
+    <script>
+        const username = sessionStorage.getItem('name')
+        document.getElementById('name').innerText = username
+
+        async function getEmployees(){
+            const token = sessionStorage.getItem('token');
+                if (!token) {
+                    window.location.href = 'login.html';
+                }
+
+                const url = 'http://localhost:3000/employees'
+
+                try {
+                    const response = await fetch(url,
+                        {
+                            method: 'GET',
+                            headers: {'x-access-token': token}
+                        });
+
+                    const employees = await response.json();
+                    addEmployeesToTable(employees);
+                } catch (error) {
+                    console.log(error.message)
+                }
+            }
+
+            async function addEmployeesToTable (employees){
+                const table = document.getElementById('table')
+
+                for(const employee of employees){
+                    const employeeRow = document.createElement('tr')
+                    const employeeName = document.createElement('td')
+                    const employeeDepartment = document.createElement('td')
+                    const editEmployee = document.createElement('button')
+                    const editDepartment = document.createElement('button')
+
+                    const department = await getDepartmentById(employee.departmentId)
+                    console.log(department)
+                    editEmployee.innerText = employee.firstName + "" + employee.lastName
+                    editDepartment.innerText = department.name 
+                    editEmployee.onclick = () => {
+                        sessionStorage.setItem('employeeData', JSON.stringify(employee));
+                        window.location.href = './editEmployee.html'
+                    }
+                    editDepartment.onclick = () => {
+                        sessionStorage.setItem('departmentData', JSON.stringify(department));
+                        window.location.href = './editDepartment.html'
+                    }
+
+                    employeeName.appendChild(editEmployee);
+                    employeeDepartment.appendChild(editDepartment);
+                    employeeRow.appendChild(employeeName);
+                    employeeRow.appendChild(employeeDepartment);
+
+                    table.appendChild(employeeRow);
+                }                 
+
+                }
+
+            
+
+            async function getDepartmentById(departmentId) {
+                const url = 'http://localhost:3000/departments/' + departmentId;
+                try {
+                    const response = await fetch(url,
+                        {
+                            method: 'GET',
+                            headers: {'x-access-token': sessionStorage.getItem('token')}
+                        });
+
+                    return await response.json();
+                } catch (error) {
+                    console.log(error.message)
+                }
+            }
+
+        
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>login</title>
+  </head>
+  <body>
+    username: <input type="text" id="username" /> <br />
+    Email: <input type="text" id="email" /> <br />
+    <button onclick="login()">login</button>
+
+    <script>
+      url = "http://localhost:3000/auth/login";
+
+      async function login() {
+        const username = document.getElementById("username").value;
+        const email = document.getElementById("email").value;
+
+        const loginData = { username, email };
+        const res = await fetch(url, {
+          method: "post",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(loginData),
+        });
+        const data = await res.json();
+
+        if (data.errorMsg != null) {
+          alert(data.errorMsg);
+        } else {
+          location.href = "employees.html";
+        }
+
+        sessionStorage.setItem("token", data.token);
+        sessionStorage.setItem("name", username);
+      }
+    </script>
+  </body>
+</html>
